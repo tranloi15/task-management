@@ -15,4 +15,8 @@ router.post("/create", controller.create);
 
 router.patch("/edit/:id", controller.edit);
 
+router.patch("/delete/:id", controller.deleteItem);
+
+router.patch("/delete-multi", controller.deleteMulti);
+
 module.exports = router;

@@ -148,3 +148,40 @@ module.exports.edit = async (req, res) => {
         res.status(500).json({ error: "Cập nhật thất bại!" });
     }
 };
+// [PATCH] /api/v1/tasks/delete/:id
+module.exports.deleteItem = async (req, res) => {
+    try {
+        const id = req.params.id;
+
+        await Task.updateOne({ _id: id }, {
+            deleted: true,
+            deletedAt: new Date()
+        });
+
+        res.json({
+            code: 200,
+            message: "Xóa thành công!"
+        });
+    } catch (error) {
+        res.status(500).json({ error: "Xóa thất bại!" });
+    }
+};
+
+// [PATCH] /api/v1/tasks/delete-multi
+module.exports.deleteMulti = async (req, res) => {
+    try {
+        const { ids } = req.body;
+
+        await Task.updateMany({ _id: { $in: ids } }, {
+            deleted: true,
+            deletedAt: new Date()
+        });
+
+        res.json({
+            code: 200,
+            message: "Xóa thành công các task!"
+        });
+    } catch (error) {
+        res.status(500).json({ error: "Xóa thất bại!" });
+    }
+};
