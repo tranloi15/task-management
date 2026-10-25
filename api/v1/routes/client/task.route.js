@@ -3,6 +3,8 @@ const router = express.Router();
 
 const controller = require("../../controllers/client/task.controller");
 
+const authMiddleware = require("../../middlewares/client/user.middleware");
+
 router.get("/", controller.index);
 
 router.get("/detail/:id", controller.detail);
@@ -11,7 +13,7 @@ router.patch("/change-status/:id", controller.changeStatus);
 
 router.patch("/change-multi", controller.changeMulti);
 
-router.post("/create", controller.create);
+router.post("/create", authMiddleware.requireAuth, controller.create);
 
 router.patch("/edit/:id", controller.edit);
 

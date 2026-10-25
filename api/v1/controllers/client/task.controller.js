@@ -118,9 +118,13 @@ module.exports.changeMulti = async (req, res) => {
         res.status(500).json({ error: "Lỗi khi cập nhật nhiều task!" });
     }
 };
+
 // [POST] /api/v1/tasks/create
 module.exports.create = async (req, res) => {
     try {
+        // Lưu id của user đã tạo task (được lấy từ middleware xác thực)
+        req.body.createdBy = req.user.id;
+
         const task = new Task(req.body);
         const data = await task.save();
 
@@ -133,6 +137,7 @@ module.exports.create = async (req, res) => {
         res.status(500).json({ error: "Tạo mới thất bại!" });
     }
 };
+
 // [PATCH] /api/v1/tasks/edit/:id
 module.exports.edit = async (req, res) => {
     try {
@@ -148,6 +153,7 @@ module.exports.edit = async (req, res) => {
         res.status(500).json({ error: "Cập nhật thất bại!" });
     }
 };
+
 // [PATCH] /api/v1/tasks/delete/:id
 module.exports.delete = async (req, res) => {
     try {
