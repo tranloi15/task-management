@@ -1,20 +1,32 @@
 const Task = require("../../models/task.model");
 
+// [GET] /tasks
 module.exports.index = async (req, res) => {
-    const tasks = await Task.find({
+    const find = {
         deleted: false
-    });
+    };
+
+    if (req.query.status) {
+        find.status = req.query.status;
+    }
+
+    const tasks = await Task.find(find);
 
     res.json(tasks);
-}
+};
 
+// [GET] /tasks/detail/:id
 module.exports.detail = async (req, res) => {
-    const id = req.params.id;
+    try {
+        const id = req.params.id;
 
-    const task = await Task.findOne({
-        _id: id,
-        deleted: false
-    });
+        const task = await Task.findOne({
+            _id: id,
+            deleted: false
+        });
 
-    res.json(task);
-}
+        res.json(task);
+    } catch (error) {
+        res.status(500).json({ error: "Lỗi khi lấy chi tiết task!" });
+    }
+};
