@@ -149,7 +149,7 @@ module.exports.edit = async (req, res) => {
     }
 };
 // [PATCH] /api/v1/tasks/delete/:id
-module.exports.deleteItem = async (req, res) => {
+module.exports.delete = async (req, res) => {
     try {
         const id = req.params.id;
 
