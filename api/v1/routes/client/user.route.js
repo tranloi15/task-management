@@ -9,4 +9,8 @@ router.post("/register", controller.registerPost);
 
 router.post("/login", controller.loginPost);
 
+router.get("/password/forgot", controller.forgotPassword);
+
+router.post("/password/forgot", controller.forgotPasswordPost);
+
 module.exports = router;

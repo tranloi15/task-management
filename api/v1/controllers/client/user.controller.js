@@ -1,6 +1,8 @@
 const User = require("../../models/user.model");
+const ForgotPassword = require("../../models/forgot-password.model");
 const md5 = require("md5");
 const generateHelper = require("../../../../helpers/generate.helper");
+const sendMailHelper = require("../../../../helpers/sendMail.helper");
 
 // [GET] /api/v1/user/register
 module.exports.register = async (req, res) => {
@@ -82,6 +84,59 @@ module.exports.loginPost = async (req, res) => {
                 fullName: user.fullName,
                 email: user.email
             }
+        });
+    } catch (error) {
+        res.status(500).json({
+            code: 500,
+            message: "Lỗi server!",
+            error: error.message
+        });
+    }
+};
+// [GET] /user/password/forgot
+module.exports.forgotPassword = async (req, res) => {
+    res.json({
+        code: 200,
+        message: "Giao diện nhập email lấy mã OTP"
+    });
+};
+
+// [POST] /user/password/forgot
+module.exports.forgotPasswordPost = async (req, res) => {
+    try {
+        const email = req.body.email;
+
+
+        const existUser = await User.findOne({
+            email: email,
+            deleted: false
+        });
+
+        if (!existUser) {
+            return res.status(400).json({
+                code: 400,
+                message: "Email không tồn tại trong hệ thống!"
+            });
+        }
+
+        const otp = generateHelper.generateRandomNumber(6);
+
+        const recordForgotPassword = new ForgotPassword({
+            email: email,
+            otp: otp,
+            expireAt: Date.now() + 3 * 60 * 1000
+        });
+        await recordForgotPassword.save();
+
+        const subject = "Mã OTP xác thực lấy lại mật khẩu";
+        const html = `Mã OTP xác thực của bạn là: <b style="color: green; font-size: 20px;">${otp}</b>. Mã có hiệu lực trong vòng 3 phút. Vui lòng không chia sẻ mã này cho bất kỳ ai.`;
+
+        sendMailHelper.sendMail(email, subject, html);
+
+        res.status(200).json({
+            code: 200,
+            message: "Đã gửi mã OTP qua email thành công!",
+            email: email
         });
     } catch (error) {
         res.status(500).json({
