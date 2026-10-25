@@ -5,48 +5,60 @@ const searchHelper = require("../../../../helpers/search");
 
 // [GET] /api/v1/tasks
 module.exports.index = async (req, res) => {
-    const find = {
-        deleted: false
-    };
+    try {
+        const find = {
+            deleted: false,
+            $or: [
+                { createdBy: req.user.id },
+                { listUser: req.user.id }
+            ]
+        };
 
-    if (req.query.status) {
-        find.status = req.query.status;
+        if (req.query.status) {
+            find.status = req.query.status;
+        }
+
+        // Sort
+        const sort = {};
+        if (req.query.sortKey && req.query.sortValue) {
+            sort[req.query.sortKey] = req.query.sortValue;
+        }
+        // End Sort
+
+        let objectSearch = searchHelper(req.query);
+
+        if (req.query.keyword) {
+            find.title = objectSearch.regex;
+        }
+
+        // Pagination
+        let initPagination = {
+            currentPage: 1,
+            limitItems: 2,
+        };
+
+        const countTasks = await Task.countDocuments(find);
+        const objectPagination = paginationHelper(
+            initPagination,
+            req.query,
+            countTasks
+        );
+        // End Pagination
+
+        const tasks = await Task
+            .find(find)
+            .limit(objectPagination.limitItems)
+            .skip(objectPagination.skip)
+            .sort(sort);
+
+        res.json({
+            code: 200,
+            totalTasks: countTasks,
+            tasks: tasks
+        });
+    } catch (error) {
+        res.status(500).json({ error: "Lỗi khi lấy danh sách task!" });
     }
-
-    // Sort
-    const sort = {};
-    if (req.query.sortKey && req.query.sortValue) {
-        sort[req.query.sortKey] = req.query.sortValue;
-    }
-    // End Sort
-
-    let objectSearch = searchHelper(req.query);
-
-    if (req.query.keyword) {
-        find.title = objectSearch.regex;
-    }
-
-    // Pagination
-    let initPagination = {
-        currentPage: 1,
-        limitItems: 2,
-    };
-
-    const countTasks = await Task.countDocuments(find);
-    const objectPagination = paginationHelper(
-        initPagination,
-        req.query,
-        countTasks
-    );
-    // End Pagination
-
-    const tasks = await Task
-        .find(find)
-        .limit(objectPagination.limitItems)
-        .skip(objectPagination.skip)
-        .sort(sort);
-
-    res.json(tasks);
 };
 
 // [GET] /api/v1/tasks/detail/:id
