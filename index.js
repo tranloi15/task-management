@@ -3,13 +3,14 @@ require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 3000;
 
-const databse = require("./config/database");
-databse.connect();
+const database = require("./config/database");
+database.connect();
 
-const routeClient = require("./routes/client/index.route");
+app.use(express.json());
+
+const routeClient = require("./api/v1/routes/client/index.route");
 
 routeClient(app);
-
 
 app.listen(port, () => {
     console.log(`App listening on port ${port}`);

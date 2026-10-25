@@ -1,6 +1,6 @@
 const Task = require("../../models/task.model");
 
-// [GET] /tasks
+// [GET] /api/v1/tasks
 module.exports.index = async (req, res) => {
     const find = {
         deleted: false
@@ -15,7 +15,7 @@ module.exports.index = async (req, res) => {
     res.json(tasks);
 };
 
-// [GET] /tasks/detail/:id
+// [GET] /api/v1/tasks/detail/:id
 module.exports.detail = async (req, res) => {
     try {
         const id = req.params.id;
