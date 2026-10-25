@@ -64,3 +64,57 @@ module.exports.detail = async (req, res) => {
         res.status(500).json({ error: "Lỗi khi lấy chi tiết task!" });
     }
 };
+
+// [PATCH] /api/v1/tasks/change-status/:id
+module.exports.changeStatus = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const { status } = req.body;
+
+        await Task.updateOne({ _id: id }, {
+            status: status
+        });
+
+        res.json({
+            code: 200,
+            message: "Cập nhật trạng thái thành công!"
+        });
+    } catch (error) {
+        res.status(500).json({ error: "Cập nhật trạng thái thất bại!" });
+    }
+};
+
+// [PATCH] /api/v1/tasks/change-multi
+module.exports.changeMulti = async (req, res) => {
+    try {
+        const { ids, key, value } = req.body;
+
+        switch (key) {
+            case "status":
+                await Task.updateMany({ _id: { $in: ids } }, { status: value });
+                res.json({
+                    code: 200,
+                    message: "Cập nhật trạng thái thành công!"
+                });
+                break;
+            case "delete":
+                await Task.updateMany({ _id: { $in: ids } }, {
+                    deleted: true,
+                    deletedAt: new Date()
+                });
+                res.json({
+                    code: 200,
+                    message: "Xóa thành công!"
+                });
+                break;
+            default:
+                res.json({
+                    code: 400,
+                    message: "Tham số không hợp lệ!"
+                });
+                break;
+        }
+    } catch (error) {
+        res.status(500).json({ error: "Lỗi khi cập nhật nhiều task!" });
+    }
+};
