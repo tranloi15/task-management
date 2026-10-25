@@ -272,3 +272,41 @@ module.exports.resetPasswordPost = async (req, res) => {
         });
     }
 };
+// [GET] /api/v1/user/info
+module.exports.info = async (req, res) => {
+    try {
+        const authHeader = req.headers.authorization;
+        const tokenUser = authHeader ? authHeader.split(" ")[1] : req.query.tokenUser || req.body.tokenUser;
+
+        if (!tokenUser) {
+            return res.status(401).json({
+                code: 401,
+                message: "Vui lòng cung cấp token xác thực!"
+            });
+        }
+
+        const user = await User.findOne({
+            tokenUser: tokenUser,
+            deleted: false
+        }).select("-password -tokenUser");
+
+        if (!user) {
+            return res.status(400).json({
+                code: 400,
+                message: "Token không hợp lệ hoặc tài khoản không tồn tại!"
+            });
+        }
+
+        res.status(200).json({
+            code: 200,
+            message: "Lấy thông tin cá nhân thành công!",
+            userInfo: user
+        });
+    } catch (error) {
+        res.status(500).json({
+            code: 500,
+            message: "Lỗi server!",
+            error: error.message
+        });
+    }
+};
