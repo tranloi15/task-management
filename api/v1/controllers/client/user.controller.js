@@ -206,3 +206,69 @@ module.exports.otpPasswordPost = async (req, res) => {
         });
     }
 };
+// [GET] /api/v1/user/password/reset
+module.exports.resetPassword = async (req, res) => {
+    try {
+        const tokenUser = req.query.tokenUser;
+
+        const user = await User.findOne({
+            tokenUser: tokenUser,
+            deleted: false
+        });
+
+        if (!user) {
+            return res.status(400).json({
+                code: 400,
+                message: "Token không hợp lệ!"
+            });
+        }
+
+        res.json({
+            code: 200,
+            message: "Màn hình đổi mật khẩu mới",
+            email: user.email
+        });
+    } catch (error) {
+        res.status(500).json({
+            code: 500,
+            message: "Lỗi server!",
+            error: error.message
+        });
+    }
+};
+
+// [POST] /api/v1/user/password/reset
+module.exports.resetPasswordPost = async (req, res) => {
+    try {
+        const { tokenUser, password } = req.body;
+
+        const user = await User.findOne({
+            tokenUser: tokenUser,
+            deleted: false
+        });
+
+        if (!user) {
+            return res.status(400).json({
+                code: 400,
+                message: "Token không hợp lệ!"
+            });
+        }
+
+        await User.updateOne({
+            tokenUser: tokenUser
+        }, {
+            password: md5(password)
+        });
+
+        res.status(200).json({
+            code: 200,
+            message: "Đổi mật khẩu thành công!"
+        });
+    } catch (error) {
+        res.status(500).json({
+            code: 500,
+            message: "Lỗi server!",
+            error: error.message
+        });
+    }
+};
