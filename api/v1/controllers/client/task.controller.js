@@ -118,3 +118,18 @@ module.exports.changeMulti = async (req, res) => {
         res.status(500).json({ error: "Lỗi khi cập nhật nhiều task!" });
     }
 };
+// [POST] /api/v1/tasks/create
+module.exports.create = async (req, res) => {
+    try {
+        const task = new Task(req.body);
+        const data = await task.save();
+
+        res.json({
+            code: 200,
+            message: "Tạo mới thành công!",
+            data: data
+        });
+    } catch (error) {
+        res.status(500).json({ error: "Tạo mới thất bại!" });
+    }
+};
