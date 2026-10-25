@@ -146,3 +146,63 @@ module.exports.forgotPasswordPost = async (req, res) => {
         });
     }
 };
+// [GET] /api/v1/user/password/otp
+module.exports.otpPassword = async (req, res) => {
+    try {
+        const email = req.query.email;
+        res.json({
+            code: 200,
+            message: "Màn hình nhập mã OTP xác thực",
+            email: email
+        });
+    } catch (error) {
+        res.status(500).json({
+            code: 500,
+            message: "Lỗi server!",
+            error: error.message
+        });
+    }
+};
+
+// [POST] /api/v1/user/password/otp
+module.exports.otpPasswordPost = async (req, res) => {
+    try {
+        const { email, otp } = req.body;
+
+        const existRecord = await ForgotPassword.findOne({
+            email: email,
+            otp: otp
+        });
+
+        if (!existRecord) {
+            return res.status(400).json({
+                code: 400,
+                message: "Mã OTP không chính xác hoặc đã hết hạn!"
+            });
+        }
+
+        const user = await User.findOne({
+            email: email,
+            deleted: false
+        });
+
+        if (!user) {
+            return res.status(400).json({
+                code: 400,
+                message: "Tài khoản không tồn tại!"
+            });
+        }
+
+        res.status(200).json({
+            code: 200,
+            message: "Xác thực mã OTP thành công!",
+            tokenUser: user.tokenUser
+        });
+    } catch (error) {
+        res.status(500).json({
+            code: 500,
+            message: "Lỗi server!",
+            error: error.message
+        });
+    }
+};
